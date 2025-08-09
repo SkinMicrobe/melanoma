@@ -1,0 +1,89 @@
+#!/bin/bash
+TID1=2 # 细菌 
+TID2=10239 # 病毒 
+TID3=4751 # 真菌 
+TID4=2157 #古细菌
+input_folder="/mnt/DATA1/TCGA/04-bowtie22" 
+report_folder="/mnt/DATA1/TCGA/05-ku" 
+output_folder="/mnt/DATA1/TCGA/06-mr" 
+mkdir -p "$output_folder" 
+code_path="/root/1-Biosoft/KrakenTools-1.2"
+# Get a list of all fastq.gz files with _host_remove suffix in the input folder
+fastq_files=("${input_folder}"/*_host_remove_R1.fastq.gz)
+# Process each sample
+for fastq_r1 in "${fastq_files[@]}"; do
+    # Extract the sample ID from the file name
+    sample_id=$(basename "${fastq_r1}" _host_remove_R1.fastq.gz)
+    
+    # Construct the full file paths
+    fastq_r2="${input_folder}/${sample_id}_host_remove_R2.fastq.gz" 
+    report_file="${report_folder}/${sample_id}_.kraken.report.txt" 
+    kraken_output="${report_folder}/${sample_id}_.kraken.output.txt" 
+    output_r1="${output_folder}/${sample_id}_mr_1.fastq" 
+    output_r2="${output_folder}/${sample_id}_mr_2.fastq"
+    
+    # Check if the result files already exist in the output folder
+    if [[ -f "${output_r1}" ]] && [[ -f "${output_r2}" ]]; then 
+        echo "Skipping sample ${sample_id} as result files already exist." 
+        continue
+    fi
+    
+    # Call the extract_kraken_reads.py script for the sample
+    python "${code_path}/extract_kraken_reads.py" \
+           -k "${kraken_output}" \
+           -s1 "${fastq_r1}" \
+           -s2 "${fastq_r2}" \
+           -o "${output_r1}" \
+           -o2 "${output_r2}" \
+           -t "${TID1}" "${TID2}" "${TID3}" "${TID4}"\
+           --include-children \
+           -r "${report_file}" \
+           --include-parents
+done
+
+
+
+#############################################################
+
+
+
+#!/bin/bash
+TID1=2 # 细菌 
+TID2=10239 # 病毒 
+TID3=4751 # 真菌 
+TID4=2157 #古细菌
+input_folder="/mnt/DATA1/TCGA/04-bowtie22" 
+report_folder="/mnt/DATA1/TCGA/05-ku" 
+output_folder="/mnt/DATA1/TCGA/06-mr"
+mkdir -p "$output_folder" 
+code_path="/root/1-Biosoft/KrakenTools-1.2"
+# Get a list of all fastq.gz files with _host_remove suffix in the input folder
+fastq_files=("${input_folder}"/*_host_remove_R1.fastq.gz)
+
+# Process each sample
+# Process each sample in reverse order
+for (( i=${#fastq_files[@]}-1; i>=0; i-- )); do
+    fastq_r1="${fastq_files[$i]}"
+    sample_id=$(basename "${fastq_r1}" _host_remove_R1.fastq.gz)
+    fastq_r2="${input_folder}/${sample_id}_host_remove_R2.fastq.gz"
+    report_file="${report_folder}/${sample_id}_.kraken.report.txt"
+    kraken_output="${report_folder}/${sample_id}_.kraken.output.txt"
+    output_r1="${output_folder}/${sample_id}_mr_1.fastq"
+    output_r2="${output_folder}/${sample_id}_mr_2.fastq"
+
+    if [[ -f "${output_r1}" ]] && [[ -f "${output_r2}" ]]; then
+        echo "Skipping sample ${sample_id} as result files already exist."
+        continue
+    fi
+
+    python "${code_path}/extract_kraken_reads.py" \
+           -k "${kraken_output}" \
+           -s1 "${fastq_r1}" \
+           -s2 "${fastq_r2}" \
+           -o "${output_r1}" \
+           -o2 "${output_r2}" \
+           -t "${TID1}" "${TID2}" "${TID3}" "${TID4}" \
+           --include-children \
+           -r "${report_file}" \
+           --include-parents
+done

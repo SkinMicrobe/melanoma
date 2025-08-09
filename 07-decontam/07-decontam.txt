@@ -1,0 +1,4 @@
+python /root/1-Biosoft/07-deconta-1.py --path5_mr /mnt/DATA1/TCGA/06-mr --path4_ku1 /mnt/DATA1/TCGA/05-ku --path6_rcr /mnt/DATA1/TCGA/07-rcr --itm_path /root/1-Biosoft/ --batch_size 40
+
+
+python /root/1-Biosoft/decontamination-2.py --path5_mr /mnt/DATA1/GEO-1/99-test/07-mr --path4_ku1 /mnt/DATA1/GEO-1/99-test/06-ku --path6_rcr /mnt/DATA1/GEO-1/99-test/08-rcr --itm_path /root/1-Biosoft/
